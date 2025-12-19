@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stardew Valley Alphabetical Random Item Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Stardew Valley</h1>
+        <div class="subtitle">alphabetical random item generator</div>
+
+        <div class="alphabet-container" id="alphabet">
+            <!-- script makes the letters -->
+        </div>
+
+        <div class="content-wrapper">
+            <div class="filter-container">
+                <div class="filter-option">
+                    <img src="ui_elements/green_square_45.png" alt="Toggle button" class="toggle-btn" id="pelicanToggle">
+                    <div class="filter-text">exclude Ginger-Island-locked items</div>
+                </div>
+                <div class="filter-option">
+                    <img src="ui_elements/green_square_45.png" alt="Toggle button" class="toggle-btn"
+                        id="perfectionToggle">
+                    <div class="filter-text">exclude perfection-locked items</div>
+                </div>
+                <div class="filter-option">
+                    <img src="ui_elements/green_square_45.png" alt="Toggle button" class="toggle-btn"
+                        id="masteryToggle">
+                    <div class="filter-text">exclude mastery-locked items</div>
+                </div>
+                <div class="filter-option">
+                    <img src="ui_elements/green_square_45.png" alt="Toggle button" class="toggle-btn"
+                        id="mineralToggle">
+                    <div class="filter-text">exclude minerals</div>
+                </div>
+            </div>
+
+            <div class="result-container" id="result">
+                <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+                <p class="prompt-text">Click a letter in the alphabet above to begin</p>
+                <p class="wiki-hint" style="visibility: hidden;">click the image above<br>to be taken to the wiki</p>
+            </div>
+        </div>
+    </div> <!-- closing content-wrapper -->
+
+    <div class="credits">
+        <h2 class="credits-title">Credits</h2>
+        <p class="credits-line">Item list: <a href="https://github.com/MateusAquino/stardewids/tree/main/dist"
+                target="_blank" class="credits-link">https://github.com/MateusAquino/stardewids/tree/main/dist</a></p>
+        <p class="credits-line">UI elements: <a href="https://snowypandas.itch.io/pixelart-menu-ui" target="_blank"
+                class="credits-link">https://snowypandas.itch.io/pixelart-menu-ui</a></p>
+        <p class="credits-line">Pixel dice: <a href="https://shiaxs.itch.io/dice-pixel" target="_blank"
+                class="credits-link">https://shiaxs.itch.io/dice-pixel</a></p>
+        <p class="credits-line">Font: <a
+                href="https://www.reddit.com/r/StardewValley/comments/4dtgp7/by_popular_request_a_stardew_valley_font_for_your/"
+                target="_blank"
+                class="credits-link">https://www.reddit.com/r/StardewValley/comments/4dtgp7/by_popular_request_a_stardew_valley_font_for_your/</a>
+        </p>
+        <p class="credits-line">Speedrun the Stardew Alphabet Idea: TheHaboo <a
+                href="https://youtu.be/cMw37Y1Owhw?si=O7qSqDkqC62AWFhw" target="_blank"
+                class="credits-link">https://youtu.be/cMw37Y1Owhw?si=O7qSqDkqC62AWFhw</a></p>
+        <p class="credits-line">All glory and copyrights to Concerned Ape</p>
+    </div>
+
+    <div class="footer">
+        <img src="ui_elements/sdv_leela_right.gif" alt="Leela" class="footer-gif">
+        <p class="footer-text">created by <a href="https://www.twitch.tv/leela_lapine" target="_blank"
+                class="footer-link">twitch.tv/leela_lapine</a></p>
+        <img src="ui_elements/sdv_leela_move_left.gif" alt="Leela" class="footer-gif">
+    </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+    <img src="ui_elements/green_toggle.png" alt="Toggle day/night mode" class="mode-toggle" id="modeToggle">
+</body>
+
+</html>
