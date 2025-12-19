@@ -12,7 +12,7 @@ let wildcardMode = false;
 // make alphabet buttons
 function createAlphabet() {
     const alphabetContainer = document.getElementById('alphabet');
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ?'.split('');
     
     letters.forEach(letter => {
         const btn = document.createElement('button');
