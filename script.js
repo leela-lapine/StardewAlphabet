@@ -1,4 +1,4 @@
-// Store all items data
+// just establishing variables
 let allItems = [];
 let selectedLetter = null;
 let excludeOutsidePelican = false;
@@ -9,7 +9,7 @@ let currentItem = null;
 let isDayMode = false;
 let wildcardMode = false;
 
-// Create alphabet buttons
+// make alphabet buttons
 function createAlphabet() {
     const alphabetContainer = document.getElementById('alphabet');
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -23,7 +23,7 @@ function createAlphabet() {
     });
 }
 
-// Load CSV data
+// load CSV 
 async function loadItems() {
     try {
         const response = await fetch('stardew_items_complete.csv');
@@ -84,7 +84,7 @@ function parseCSVLine(line) {
 function selectLetter(letter) {
     selectedLetter = letter;
     
-    // Update button styling
+    // button visual stuff 
     document.querySelectorAll('.letter-btn').forEach(btn => {
         btn.classList.remove('selected');
         if (btn.textContent === letter) {
@@ -300,6 +300,7 @@ function toggleDayNight() {
     isDayMode = !isDayMode;
     const root = document.documentElement;
     const modeToggle = document.getElementById('modeToggle');
+    const pelicanToggle = document.getElementById('pelicanToggle'); 
     const perfectionToggle = document.getElementById('perfectionToggle');
     const masteryToggle = document.getElementById('masteryToggle');
     const mineralToggle = document.getElementById('mineralToggle');
