@@ -150,9 +150,12 @@ function displayItem(item) {
     const wikiUrl = item.wiki_url || item['wiki_url'];
     const itemName = item.name;
     
-    // If the path doesn't include the folder, add it
+    // If the path doesn't include the folder, add it with letter subfolder
     if (imagePath && !imagePath.includes('/')) {
-        imagePath = 'stardew_item_images/' + imagePath;
+        const firstLetter = itemName.charAt(0).toUpperCase();
+        // handle weird characters like ?
+        const folderName = /[A-Z]/.test(firstLetter) ? firstLetter : 'Other';
+        imagePath = `stardew_item_images/${folderName}/${imagePath}`;
     }
     
     resultContainer.innerHTML = `
