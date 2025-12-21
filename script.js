@@ -106,6 +106,14 @@ function selectLetter(letter) {
         );
     }
 
+    // Apply outside-pelican filter (this was missing and recently added in)
+    if (excludeOutsidePelican) {
+        itemsForLetter = itemsForLetter.filter(item => {
+            const outsidePelican = item['OutsidePelican'] || item['outsidepelican'] || '';
+            return outsidePelican.toLowerCase() !== 'yes';
+        });
+    }
+
     // Apply perfection-locked filter
     if (excludePerfectionLocked) {
         itemsForLetter = itemsForLetter.filter(item => {
