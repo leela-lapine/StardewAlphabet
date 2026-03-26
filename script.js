@@ -32,11 +32,11 @@ async function loadItems() {
     } catch (error) {
         console.error('Error loading CSV:', error);
         document.getElementById('result').innerHTML = 
-            '<p class="error-message">Error loading items. Please make sure stardew_items_complete.csv is in the same folder as this HTML file.</p>';
+            '<p class="error-message">Error loading items.</p>';
     }
 }
 
-// Parse CSV data
+// parse CSV data
 function parseCSV(csvText) {
     const lines = csvText.split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
@@ -57,7 +57,7 @@ function parseCSV(csvText) {
     console.log(`Loaded ${allItems.length} items`);
 }
 
-// Parse a single CSV line (handles commas in quoted fields)
+// parse a single CSV line (handles commas in quoted fields)
 function parseCSVLine(line) {
     const result = [];
     let current = '';
@@ -80,7 +80,7 @@ function parseCSVLine(line) {
     return result;
 }
 
-// Select a letter and show random item
+// select a letter and show random item
 function selectLetter(letter) {
     selectedLetter = letter;
     
@@ -95,18 +95,18 @@ function selectLetter(letter) {
     // updated version for wildcard mode 
     let itemsForLetter;
     if (letter === 'X' && wildcardMode) {
-        // Wildcard mode: get all items EXCEPT those starting with X
+        // wildcard mode: get all items EXCEPT those starting with X
         itemsForLetter = allItems.filter(item => 
             item.name && item.name.charAt(0).toUpperCase() !== 'X'
         );
     } else {
-        // Normal mode: get items starting with selected letter
+        // normal mode: get items starting with selected letter
         itemsForLetter = allItems.filter(item => 
             item.name && item.name.charAt(0).toUpperCase() === letter
         );
     }
 
-    // Apply outside-pelican filter (this was missing and recently added in)
+    // apply outside-pelican filter
     if (excludeOutsidePelican) {
         itemsForLetter = itemsForLetter.filter(item => {
             const outsidePelican = item['OutsidePelican'] || item['outsidepelican'] || '';
@@ -114,7 +114,7 @@ function selectLetter(letter) {
         });
     }
 
-    // Apply perfection-locked filter
+    // apply perfection-locked filter
     if (excludePerfectionLocked) {
         itemsForLetter = itemsForLetter.filter(item => {
             const perfectionLocked = item['Perfection-locked'] || item['perfection-locked'] || '';
@@ -122,7 +122,7 @@ function selectLetter(letter) {
         });
     }
     
-    // Apply mastery-locked filter
+    // apply mastery-locked filter
     if (excludeMasteryLocked) {
         itemsForLetter = itemsForLetter.filter(item => {
             const masteryLocked = item['Mastery-locked'] || item['mastery-locked'] || '';
@@ -130,7 +130,7 @@ function selectLetter(letter) {
         });
     }
 
-    // Apply mineral-locked filter
+    // apply mineral-locked filter
     if (excludeMineralLocked) {
         itemsForLetter = itemsForLetter.filter(item => {
             const mineralLocked = item['Mineral'] || item['mineral'] || '';
@@ -144,13 +144,44 @@ function selectLetter(letter) {
         return;
     }
     
-    // Pick random item
-    const randomItem = itemsForLetter[Math.floor(Math.random() * itemsForLetter.length)];
-    displayItem(randomItem);
+    // pick the final random item
+    const finalItem = itemsForLetter[Math.floor(Math.random() * itemsForLetter.length)];
+    
+    // start slot machine animation
+    slotMachineAnimation(itemsForLetter, finalItem);
 }
 
-// Display the selected item
-function displayItem(item) {
+// slot machine animation before revealing final item
+function slotMachineAnimation(itemsForLetter, finalItem) {
+    const totalCycles = 12; // Total number of flashes
+    let currentCycle = 0;
+    
+    // calculate timing - start fast, slow down at the end
+    function getDelay(cycle) {
+        if (cycle < 6) return 80;  // fast at the beginning
+        if (cycle < 9) return 150; // medium speed
+        return 300; // slow down at the end
+    }
+    
+    function showNextItem() {
+        if (currentCycle < totalCycles) {
+            // pick a random item to flash (can repeat)
+            const randomItem = itemsForLetter[Math.floor(Math.random() * itemsForLetter.length)];
+            displayItem(randomItem, true); // true = animation mode
+            
+            currentCycle++;
+            setTimeout(showNextItem, getDelay(currentCycle));
+        } else {
+            // animation done - show the final item
+            displayItem(finalItem, false); // false = final reveal
+        }
+    }
+    
+    showNextItem();
+}
+
+// display selected item
+function displayItem(item, isAnimating = false) {
     currentItem = item; 
     const resultContainer = document.getElementById('result');
     
@@ -158,7 +189,7 @@ function displayItem(item) {
     const wikiUrl = item.wiki_url || item['wiki_url'];
     const itemName = item.name;
     
-    // If the path doesn't include the folder, add it with letter subfolder
+    // add path and letter sub folder 
     if (imagePath && !imagePath.includes('/')) {
         const firstLetter = itemName.charAt(0).toUpperCase();
         // handle weird characters like ?
@@ -166,41 +197,55 @@ function displayItem(item) {
         imagePath = `stardew_item_images/${folderName}/${imagePath}`;
     }
     
-    resultContainer.innerHTML = `
-        <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
-        <div class="item-name-container">
-            <img src="ui_elements/d6.png" alt="Reroll" class="reroll-btn" id="rerollBtn">
-            <div class="item-name">${itemName}</div>
-    </div>
-    <a href="${wikiUrl}" target="_blank" class="item-image-link">
-        <img src="${imagePath}" alt="${itemName}" class="item-image">
-    </a>
-    <p class="wiki-hint">click the image above<br>to be taken to the wiki</p>
-`;
-    
-    // Add click handler to reroll button
-    document.getElementById('rerollBtn').addEventListener('click', () => {
-        if (selectedLetter) {
-            selectLetter(selectedLetter);
-        }
-    });
+    // during slot machine animation, show "generating item..." instead of item name
+    if (isAnimating) {
+        resultContainer.innerHTML = `
+            <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+            <div class="item-name-container">
+                <div class="item-name generating">generating item...</div>
+            </div>
+            <div class="item-image-link">
+                <img src="${imagePath}" alt="${itemName}" class="item-image">
+            </div>
+        `;
+    } else {
+        // final reveal - show everything including the actual item name
+        resultContainer.innerHTML = `
+            <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+            <div class="item-name-container">
+                <img src="ui_elements/d6.png" alt="Reroll" class="reroll-btn" id="rerollBtn">
+                <div class="item-name">${itemName}</div>
+            </div>
+            <a href="${wikiUrl}" target="_blank" class="item-image-link">
+                <img src="${imagePath}" alt="${itemName}" class="item-image">
+            </a>
+            <p class="wiki-hint">click the image above<br>to be taken to the wiki</p>
+        `;
+        
+        // add click handler to reroll button
+        document.getElementById('rerollBtn').addEventListener('click', () => {
+            if (selectedLetter) {
+                selectLetter(selectedLetter);
+            }
+        });
+    }
 }
 
 
-// Setup wildcard mode
+// setup wildcard mode
 function setupWildcardMode() {
     const leftGif = document.querySelector('.footer-gif:first-of-type');
     const rightGif = document.querySelector('.footer-gif:last-of-type');
     const footer = document.querySelector('.footer');
     
-    // Create the status message element
+    // create the status message element
     const statusMessage = document.createElement('p');
     statusMessage.className = 'wildcard-status';
     statusMessage.style.display = 'none';
     statusMessage.textContent = 'letter X wildcard mode engaged';
     footer.parentNode.insertBefore(statusMessage, footer.nextSibling);
     
-    // Left GIF - turn ON wildcard mode
+    // left GIF - turn ON wildcard mode
     leftGif.addEventListener('click', () => {
         wildcardMode = true;
         statusMessage.style.display = 'block';
@@ -208,7 +253,7 @@ function setupWildcardMode() {
         rightGif.style.cursor = 'pointer';
     });
     
-    // Right GIF - turn OFF wildcard mode (only if it was on)
+    // right GIF - turn OFF wildcard mode if it was on
     rightGif.addEventListener('click', () => {
         if (wildcardMode) {
             wildcardMode = false;
@@ -216,13 +261,13 @@ function setupWildcardMode() {
         }
     });
     
-    // Add pointer cursor on hover to hint they're clickable
+    // add pointer cursor on hover to hint they're clickable
     leftGif.style.cursor = 'pointer';
     rightGif.style.cursor = 'pointer';
 }
 
 
-// Initialize on page load
+// initialize on page load
 window.addEventListener('load', () => {
     createAlphabet();
     loadItems();
@@ -231,7 +276,7 @@ window.addEventListener('load', () => {
     document.getElementById('modeToggle').addEventListener('click', toggleDayNight);
 });
 
-// Setup toggle button functionality
+// setup toggle button functionality
 function setupToggleButtons() {
     const pelicanToggle = document.getElementById('pelicanToggle');
     const perfectionToggle = document.getElementById('perfectionToggle');
@@ -255,7 +300,7 @@ function setupToggleButtons() {
         excludePerfectionLocked = !excludePerfectionLocked;
         updateToggleButton(perfectionToggle, excludePerfectionLocked);
         
-        // Only reroll if we have a selected letter and current item would be excluded
+        // only reroll if we have a selected letter and current item would be excluded
         if (selectedLetter && currentItem) {
             const perfectionLocked = currentItem['Perfection-locked'] || currentItem['perfection-locked'] || '';
             if (excludePerfectionLocked && perfectionLocked.toLowerCase() === 'yes') {
@@ -268,7 +313,7 @@ function setupToggleButtons() {
         excludeMasteryLocked = !excludeMasteryLocked;
         updateToggleButton(masteryToggle, excludeMasteryLocked);
         
-        // Only reroll if we have a selected letter and current item would be excluded
+        // only reroll if we have a selected letter and current item would be excluded
         if (selectedLetter && currentItem) {
             const masteryLocked = currentItem['Mastery-locked'] || currentItem['mastery-locked'] || '';
             if (excludeMasteryLocked && masteryLocked.toLowerCase() === 'yes') {
@@ -281,7 +326,7 @@ function setupToggleButtons() {
         excludeMineralLocked = !excludeMineralLocked;
         updateToggleButton(mineralToggle, excludeMineralLocked);
     
-        // Only reroll if we have a selected letter and current item would be excluded
+        // only reroll if we have a selected letter and current item would be excluded
         if (selectedLetter && currentItem) {
             const mineralLocked = currentItem['Mineral'] || currentItem['mineral'] || '';
             if (excludeMineralLocked && mineralLocked.toLowerCase() === 'yes') {
@@ -291,7 +336,7 @@ function setupToggleButtons() {
     });
 }
 
-// Update toggle button image
+// update toggle button image
 function updateToggleButton(button, isPressed) {
     console.log('Toggle button - isPressed:', isPressed);
     
@@ -317,13 +362,13 @@ function toggleDayNight() {
     const mineralToggle = document.getElementById('mineralToggle');
 
     if (isDayMode) {
-        // Day mode
+        // day mode
         root.style.setProperty('--bg-color', '#e9e6df');
         root.style.setProperty('--text-color', '#000000');
         root.style.setProperty('--highlight-color', '#ad2f45');
         modeToggle.src = 'ui_elements/red_toggle.png';
         
-        // Update filter buttons if not pressed
+        // update filter buttons if not pressed
         if (!excludeOutsidePelican) {
             pelicanToggle.src = 'ui_elements/red_square_44.png';
         } else {
@@ -345,13 +390,13 @@ function toggleDayNight() {
             mineralToggle.src = 'ui_elements/red_pressed_square_1.png';
         }
     } else {
-        // Night mode
+        // night mode
         root.style.setProperty('--bg-color', 'black');
         root.style.setProperty('--text-color', 'white');
         root.style.setProperty('--highlight-color', '#63ab3f');
         modeToggle.src = 'ui_elements/green_toggle.png';
         
-        // Update filter buttons if not pressed
+        // update filter buttons if not pressed
         if (!excludeOutsidePelican) {
             pelicanToggle.src = 'ui_elements/green_square_45.png';
         } else {

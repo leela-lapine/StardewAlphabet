@@ -212,6 +212,7 @@ h1 {    /* title */
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
+    object-fit: contain;
 }
 
 .error-message {
