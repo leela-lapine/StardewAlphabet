@@ -80,7 +80,7 @@ function parseCSVLine(line) {
     return result;
 }
 
-// select a letter and show random item
+// updated selectLetter to accomodate preloads 
 function selectLetter(letter) {
     selectedLetter = letter;
     
@@ -147,9 +147,49 @@ function selectLetter(letter) {
     // pick the final random item
     const finalItem = itemsForLetter[Math.floor(Math.random() * itemsForLetter.length)];
     
-    // start slot machine animation
-    slotMachineAnimation(itemsForLetter, finalItem);
+    // preload images before starting animation to things don't look CRAZY 
+    preloadImages(itemsForLetter, () => {
+        // start animation after images are loaded
+        slotMachineAnimation(itemsForLetter, finalItem);
+    });
 }
+
+
+// new function that preloads imagines 
+function preloadImages(items, callback) {
+    let loadedCount = 0;
+    const imagesToLoad = Math.min(items.length, 15); // only preload up to 15 images
+    
+    // if there are very few items, preload them all
+    const itemsToPreload = items.slice(0, imagesToLoad);
+    
+    if (itemsToPreload.length === 0) {
+        callback();
+        return;
+    }
+    
+    itemsToPreload.forEach(item => {
+        const img = new Image();
+        let imagePath = item.local_image_path || item['local_image_path'];
+        const itemName = item.name;
+        
+        if (imagePath && !imagePath.includes('/')) {
+            const firstLetter = itemName.charAt(0).toUpperCase();
+            const folderName = /[A-Z]/.test(firstLetter) ? firstLetter : 'Other';
+            imagePath = `stardew_item_images/${folderName}/${imagePath}`;
+        }
+        
+        img.onload = img.onerror = () => {
+            loadedCount++;
+            if (loadedCount === itemsToPreload.length) {
+                callback();
+            }
+        };
+        
+        img.src = imagePath;
+    });
+}
+
 
 // slot machine animation before revealing final item
 function slotMachineAnimation(itemsForLetter, finalItem) {
