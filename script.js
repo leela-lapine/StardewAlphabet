@@ -220,16 +220,15 @@ function slotMachineAnimation(itemsForLetter, finalItem) {
     showNextItem();
 }
 
-// display selected item
+// updated display item function that should look ok on firefox 
 function displayItem(item, isAnimating = false) {
-    currentItem = item; 
     const resultContainer = document.getElementById('result');
     
     let imagePath = item.local_image_path || item['local_image_path'];
     const wikiUrl = item.wiki_url || item['wiki_url'];
     const itemName = item.name;
     
-    // add path and letter sub folder 
+    // if the path doesn't include the folder, add it with letter subfolder
     if (imagePath && !imagePath.includes('/')) {
         const firstLetter = itemName.charAt(0).toUpperCase();
         // handle weird characters like ?
@@ -237,19 +236,29 @@ function displayItem(item, isAnimating = false) {
         imagePath = `stardew_item_images/${folderName}/${imagePath}`;
     }
     
-    // during slot machine animation, show "generating item..." instead of item name
+    // during animation, only update the image, keep text stable
     if (isAnimating) {
-        resultContainer.innerHTML = `
-            <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
-            <div class="item-name-container">
-                <div class="item-name generating">generating item...</div>
-            </div>
-            <div class="item-image-link">
-                <img src="${imagePath}" alt="${itemName}" class="item-image">
-            </div>
-        `;
+        // check if we already have the animation structure
+        const existingImage = resultContainer.querySelector('.item-image');
+        if (existingImage) {
+            // just update the image source instead of rebuilding entire HTML
+            existingImage.src = imagePath;
+            existingImage.alt = itemName;
+        } else {
+            // First time - build the structure
+            resultContainer.innerHTML = `
+                <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+                <div class="item-name-container">
+                    <div class="item-name generating">generating item...</div>
+                </div>
+                <div class="item-image-link">
+                    <img src="${imagePath}" alt="${itemName}" class="item-image">
+                </div>
+            `;
+        }
     } else {
-        // final reveal - show everything including the actual item name
+        // rinal reveal - rebuild with full details
+        currentItem = item;
         resultContainer.innerHTML = `
             <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
             <div class="item-name-container">
