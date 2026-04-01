@@ -220,7 +220,7 @@ function slotMachineAnimation(itemsForLetter, finalItem) {
     showNextItem();
 }
 
-// updated display item function that should look ok on firefox 
+// updated (version 3) display item function that should look ok on firefox 
 function displayItem(item, isAnimating = false) {
     const resultContainer = document.getElementById('result');
     
@@ -240,12 +240,16 @@ function displayItem(item, isAnimating = false) {
     if (isAnimating) {
         // check if we already have the animation structure
         const existingImage = resultContainer.querySelector('.item-image');
-        if (existingImage) {
-            // just update the image source instead of rebuilding entire HTML
+        const existingName = resultContainer.querySelector('.item-name');
+        
+        if (existingImage && existingName) {
+            // just update the image source and reset the name text
             existingImage.src = imagePath;
             existingImage.alt = itemName;
+            existingName.textContent = 'generating item...';
+            existingName.className = 'item-name generating';
         } else {
-            // First time - build the structure
+            // first time - build the structure
             resultContainer.innerHTML = `
                 <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
                 <div class="item-name-container">
@@ -257,26 +261,56 @@ function displayItem(item, isAnimating = false) {
             `;
         }
     } else {
-        // rinal reveal - rebuild with full details
+        // final reveal - hide container while loading, then show when ready
         currentItem = item;
-        resultContainer.innerHTML = `
-            <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
-            <div class="item-name-container">
-                <img src="ui_elements/d6.png" alt="Reroll" class="reroll-btn" id="rerollBtn">
-                <div class="item-name">${itemName}</div>
-            </div>
-            <a href="${wikiUrl}" target="_blank" class="item-image-link">
-                <img src="${imagePath}" alt="${itemName}" class="item-image">
-            </a>
-            <p class="wiki-hint">click the image above<br>to be taken to the wiki</p>
-        `;
         
-        // add click handler to reroll button
-        document.getElementById('rerollBtn').addEventListener('click', () => {
-            if (selectedLetter) {
-                selectLetter(selectedLetter);
-            }
-        });
+        // preload the final image first (this is for firefox's sake)
+        const finalImg = new Image();
+        finalImg.onload = () => {
+            // Image is loaded, now safely update the HTML
+            resultContainer.innerHTML = `
+                <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+                <div class="item-name-container">
+                    <img src="ui_elements/d6.png" alt="Reroll" class="reroll-btn" id="rerollBtn">
+                    <div class="item-name">${itemName}</div>
+                </div>
+                <a href="${wikiUrl}" target="_blank" class="item-image-link">
+                    <img src="${imagePath}" alt="${itemName}" class="item-image">
+                </a>
+                <p class="wiki-hint">click the image above<br>to be taken to the wiki</p>
+            `;
+            
+            // Add click handler to reroll button
+            document.getElementById('rerollBtn').addEventListener('click', () => {
+                if (selectedLetter) {
+                    selectLetter(selectedLetter);
+                }
+            });
+        };
+        
+        // if image fails to load, still show the content
+        finalImg.onerror = () => {
+            resultContainer.innerHTML = `
+                <img src="ui_elements/panel.png" alt="Panel" class="image-panel">
+                <div class="item-name-container">
+                    <img src="ui_elements/d6.png" alt="Reroll" class="reroll-btn" id="rerollBtn">
+                    <div class="item-name">${itemName}</div>
+                </div>
+                <a href="${wikiUrl}" target="_blank" class="item-image-link">
+                    <img src="${imagePath}" alt="${itemName}" class="item-image">
+                </a>
+                <p class="wiki-hint">click the image above<br>to be taken to the wiki</p>
+            `;
+            
+            document.getElementById('rerollBtn').addEventListener('click', () => {
+                if (selectedLetter) {
+                    selectLetter(selectedLetter);
+                }
+            });
+        };
+        
+        // Start loading the image
+        finalImg.src = imagePath;
     }
 }
 
